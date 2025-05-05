@@ -2,4 +2,10 @@
 
 source "https://rubygems.org"
 
-# gem "rails"
+ruby '3.4.1'
+
+group :development do
+  gem 'rubocop'
+  gem 'ruby-lsp'
+end
+
