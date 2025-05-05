@@ -4,8 +4,10 @@ source "https://rubygems.org"
 
 ruby '3.4.1'
 
+gem 'dotenv'
+gem 'ruby-anthropic'
+
 group :development do
   gem 'rubocop'
   gem 'ruby-lsp'
 end
-
