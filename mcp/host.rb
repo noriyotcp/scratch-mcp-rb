@@ -6,7 +6,7 @@ Dotenv.load
 
 module MCP
   class Host
-    attr_reader :client
+    attr_reader :client, :anthropic_client
 
     def initialize(server_file_path:)
       @client = MCP::Client.new(server_file_path: server_file_path)
