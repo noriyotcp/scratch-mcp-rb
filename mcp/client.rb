@@ -43,7 +43,7 @@ module MCP
             version: '1.0.0',
           }
         },
-        id: 1
+        id: SecureRandom.uuid
       })
 
       # initialized notification
@@ -53,6 +53,13 @@ module MCP
       })
 
       response
+    end
+
+    def ping
+      send_request({
+        jsonrpc: '2.0',
+        method: 'ping',
+      })
     end
 
     # Shutdown

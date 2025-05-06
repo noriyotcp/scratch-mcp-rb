@@ -5,8 +5,11 @@ require_relative '../logger'
 module MCP
   module Dice
     class Server
+      attr_reader :initialized
+
       def initialize
         @connection = StdioConnection.new
+        @initialized = false
         @logger = Logger.new('tmp/mcp.log')
       end
 
@@ -25,8 +28,22 @@ module MCP
         end
       end
 
+      private
+
+      def allowed_methods
+        %w[
+          initialize
+          notifications/initialized
+          ping
+        ]
+      end
+
       def process_message(message)
         request = JSON.parse(message, symbolize_names: true)
+
+        if !@initialized && !allowed_methods.include?(request[:method])
+          raise "Method not allowed: #{request[:method]}"
+        end
 
         case request[:method]
         when 'initialize'
@@ -58,7 +75,15 @@ module MCP
           }
         when 'notifications/initialized'
           @logger.info('RPC: notifications/initialized')
+          @initialized = true
           nil
+        when 'ping'
+          @logger.info('RPC: ping')
+          {
+            jsonrpc: '2.0',
+            id: request[:id],
+            result: 'pong'
+          }
         end
       end
     end
