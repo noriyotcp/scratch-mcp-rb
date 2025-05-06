@@ -10,6 +10,7 @@ module MCP
 
     def initialize(server_file_path:)
       @client = MCP::Client.new(server_file_path: server_file_path)
+      @anthropic_client = Anthropic::Client.new(access_token: ENV.fetch('ANTHROPIC_API_KEY', nil), log_errors: true)
     end
 
     def connect_to_server
@@ -40,21 +41,8 @@ module MCP
     private
 
     def process_query(query)
-      # 通常のクエリ処理
-      puts "Processing query: #{query}"
       begin
-        client = Anthropic::Client.new(access_token: ENV.fetch('ANTHROPIC_API_KEY', nil), log_errors: true)
-
-        response = client.messages(
-          parameters: {
-            model: 'claude-3-7-sonnet-20250219',
-            system: 'Respond only in Japanese.',
-            messages: [
-              { role: 'user', content: query }
-            ],
-            max_tokens: 1000
-          }
-        )
+        response = generate_initial_messages(query)
 
         if response['content'].empty?
           puts 'No response from server.'
@@ -64,6 +52,30 @@ module MCP
       rescue StandardError => e
         puts "Error processing query: #{e.message}"
       end
+    end
+
+    def generate_initial_messages(query)
+      initial_messages = [
+        { role: 'user', content: query }
+      ]
+      response = @client.list_tools
+      available_tools = response[:tools].map do |tool|
+        {
+          name: tool[:name],
+          description: tool[:description],
+          input_schema: tool[:input_schema]
+        }
+      end
+
+      @anthropic_client.messages(
+          parameters: {
+            model: 'claude-3-7-sonnet-20250219',
+            system: 'Respond only in Japanese.',
+            messages: initial_messages,
+            max_tokens: 1000,
+            tools: available_tools,
+          }
+        )
     end
   end
 end
