@@ -11,6 +11,8 @@ def main
   host = MCP::Host.new(server_file_path: file_path)
   host.connect_to_server
   host.chat_loop
+ensure
+  host.client.close if host
 end
 
 main if $PROGRAM_NAME == __FILE__
