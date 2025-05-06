@@ -66,8 +66,7 @@ module MCP
 
       if response['content'].empty?
         puts 'No response from server.'
-      else
-        puts response['content'][0]['text']
+        return
       end
 
       final_text = []
@@ -78,7 +77,7 @@ module MCP
           assistant_message_content << content
         elsif content['type'] == 'tool_use'
           tool_name = content['name']
-          tool_args = content['args']
+          tool_args = content['input']
 
           result = @client.call_tool(name: tool_name, args: tool_args)
           final_text.push("[Calling tool: #{tool_name} with args: #{tool_args}]")
