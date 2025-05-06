@@ -28,11 +28,12 @@ module MCP
       end
     end
 
-    def register_tool(name:, description:, input_schema:)
+    def register_tool(name:, description:, input_schema:, handler:)
       @tools[name] = {
         name: name,
         description: description,
-        input_schema: input_schema
+        input_schema: input_schema,
+        handler: handler
       }
     end
 
@@ -50,9 +51,7 @@ module MCP
     def process_message(message)
       request = JSON.parse(message, symbolize_names: true)
 
-      if !@initialized && !allowed_methods.include?(request[:method])
-        raise "Method not allowed: #{request[:method]}"
-      end
+      raise "Method not allowed: #{request[:method]}" if !@initialized && !allowed_methods.include?(request[:method])
 
       case request[:method]
       when 'initialize'
@@ -99,7 +98,7 @@ module MCP
           {
             name:,
             description: tool[:description],
-            input_schema: tool[:input_schema],
+            input_schema: tool[:input_schema]
           }
         end
         {
@@ -107,6 +106,22 @@ module MCP
           id: request[:id],
           result: {
             tools: tools
+          }
+        }
+      when 'tools/call'
+        @logger.info('RPC: tools/call')
+        tool_name = request[:params][:name]
+        tool_args = request[:params][:args]
+        tool = @tools[tool_name]
+
+        raise "Tool not found: #{tool_name}" if tool.nil?
+
+        result = tool[:handler].call(tool_args)
+        {
+          jsonrpc: '2.0',
+          id: request[:id],
+          result: {
+            content: result
           }
         }
       end

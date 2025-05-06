@@ -42,7 +42,7 @@ module MCP
           protocolVersion: '2024-11-05',
           clientInfo: {
             name: 'MCP Client',
-            version: '1.0.0',
+            version: '1.0.0'
           }
         },
         id: SecureRandom.uuid
@@ -60,7 +60,7 @@ module MCP
     def ping
       send_request({
         jsonrpc: '2.0',
-        method: 'ping',
+        method: 'ping'
       })
     end
 
@@ -89,6 +89,20 @@ module MCP
         jsonrpc: '2.0',
         method: 'tools/list',
         params: {},
+        id: SecureRandom.uuid
+      })
+    end
+
+    def call_tool(name:, args: {})
+      return raise 'Server is not running' if @pid.nil?
+
+      send_request({
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          name: name,
+          args: args
+        },
         id: SecureRandom.uuid
       })
     end

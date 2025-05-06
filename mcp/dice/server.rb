@@ -16,7 +16,11 @@ server.register_tool(
       }
     },
     required: ['sides']
-  }
+  },
+  handler: proc do |args|
+    sides = args[:sides] || 6
+    rand(1..sides)
+  end
 )
 
 # サーバー実行
