@@ -1,11 +1,28 @@
 require 'json'
+require_relative '../stdio_connection'
+require_relative '../logger'
 
 module MCP
   module Dice
     class Server
-      def initialize(stdin, stdout)
-        @stdin = stdin
-        @stdout = stdout
+      def initialize
+        @connection = StdioConnection.new
+        @logger = Logger.new('tmp/mcp.log')
+      end
+
+      def run
+        loop do
+          next_message = @connection.read_next_message
+          if next_message.nil?
+            puts 'Connection closed.'
+            break
+          end
+
+          response = process_message(next_message)
+          next if response.nil?
+
+          @connection.send_message(JSON.generate(response))
+        end
       end
 
       def process_message(message)
@@ -13,7 +30,8 @@ module MCP
 
         case request[:method]
         when 'initialize'
-          JSON.generate({
+          @logger.info('RPC: initialize')
+          {
             jsonrpc: '2.0',
             id: 1,
             result: {
@@ -37,11 +55,14 @@ module MCP
               },
               instructions: 'Optional instructions for the client'
             }
-          })
+          }
         when 'notifications/initialized'
+          @logger.info('RPC: notifications/initialized')
           nil
         end
       end
     end
   end
 end
+
+MCP::Dice::Server.new.run
