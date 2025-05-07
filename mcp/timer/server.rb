@@ -112,5 +112,49 @@ server.register_tool(
   end
 )
 
+# 現在実行中のタスク一覧を表示するツール
+server.register_tool(
+  name: 'timer_list',
+  description: 'List all currently running time tracking tasks',
+  input_schema: {
+    type: 'object',
+    properties: {}
+  },
+  handler: proc do |_args|
+    if timer_sessions.empty?
+      {
+        status: 'info',
+        message: 'No active tasks'
+      }
+    else
+      current_time = Time.now
+      active_tasks = timer_sessions.map do |task_name, session|
+        start_time = session[:start_time]
+
+        # Calculate elapsed time
+        elapsed_seconds = current_time - start_time
+        hours = (elapsed_seconds / 3600).to_i
+        minutes = ((elapsed_seconds % 3600) / 60).to_i
+        seconds = (elapsed_seconds % 60).to_i
+        formatted_elapsed = format('%02d:%02d:%02d', hours, minutes, seconds)
+
+        {
+          task: task_name,
+          start_time: start_time.iso8601,
+          elapsed_time: formatted_elapsed,
+          elapsed_seconds: elapsed_seconds.to_i,
+          timezone: session[:timezone]
+        }
+      end
+
+      {
+        status: 'success',
+        active_task_count: active_tasks.size,
+        tasks: active_tasks
+      }
+    end
+  end
+)
+
 # サーバー実行
 server.run
