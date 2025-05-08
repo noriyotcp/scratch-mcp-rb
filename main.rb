@@ -12,7 +12,7 @@ def main
   host.connect_to_server
   host.chat_loop
 ensure
-  host.client.close if host
+  host&.client&.close
 end
 
 main if $PROGRAM_NAME == __FILE__
