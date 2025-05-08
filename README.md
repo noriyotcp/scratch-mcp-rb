@@ -16,7 +16,7 @@ Almost scratch MCP Host/Client/Server in Ruby
 0. Set up environment:
 
 ```bash
-cp .env.example .env
+cp .env.sample .env
 ```
 
 1. Install dependencies:
