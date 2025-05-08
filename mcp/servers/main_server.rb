@@ -1,6 +1,6 @@
-require_relative 'server'
-require_relative 'tools/dice'
-require_relative 'tools/timer'
+require_relative '../server'
+require_relative '../tools/dice'
+require_relative '../tools/timer'
 
 module MCP
   class MainServer
