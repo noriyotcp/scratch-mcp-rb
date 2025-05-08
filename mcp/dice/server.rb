@@ -1,27 +1,19 @@
 require_relative '../server'
+require_relative '../tools/dice'
 
 server = MCP::Server.new
 
-# Diceツールの登録
-server.register_tool(
-  name: 'dice',
-  description: 'Roll a dice with the specified number of sides',
-  input_schema: {
-    type: 'object',
-    properties: {
-      sides: {
-        type: 'integer',
-        description: 'Number of sides on the dice',
-        default: 6
-      }
-    },
-    required: ['sides']
-  },
-  handler: proc do |args|
-    sides = args[:sides] || 6
-    rand(1..sides)
-  end
-)
+dice_tools = MCP::Tools::Dice.new.tools
+dice_tools = [dice_tools] unless dice_tools.is_a?(Array)
+
+dice_tools.each do |tool|
+  server.register_tool(
+    name: tool[:name],
+    description: tool[:description],
+    input_schema: tool[:input_schema],
+    handler: tool[:handler]
+  )
+end
 
 # サーバー実行
 server.run
