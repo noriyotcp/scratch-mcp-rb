@@ -1,7 +1,7 @@
 require_relative 'mcp/host'
 
 def main
-  file_path = ARGV[0]
+  file_path = ARGV[0] || 'mcp/servers/main_server.rb'
 
   if file_path.nil? || !File.exist?(file_path)
     puts 'Please provide a server file path.'
